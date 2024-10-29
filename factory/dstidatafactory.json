@@ -1,0 +1,9 @@
+{
+	"name": "dstidatafactory",
+	"location": "francecentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "b1ad14f6-03d1-4045-b3ec-0fd7fed1d1c1",
+		"tenantId": "e5d15069-41a2-48be-a3f3-d7f52db16425"
+	}
+}
