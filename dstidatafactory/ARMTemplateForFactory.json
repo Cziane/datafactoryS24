@@ -394,6 +394,36 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DailySales')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "SalesPipeline",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2024-10-29T11:05:00",
+						"timeZone": "Romance Standard Time"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/SalesPipeline')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Every2min')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -455,9 +485,6 @@
 						},
 						{
 							"name": "FormatDate"
-						},
-						{
-							"name": "RemoveWrongDate"
 						}
 					],
 					"scriptLines": [
@@ -474,9 +501,18 @@
 						"     limit: 100,",
 						"     ignoreNoFilesFound: false) ~> CsvSales",
 						"CsvSales filter(( !isNull(QuantitySold) && QuantitySold > 0 && !isNull(Price) && Price >0  )) ~> CleansingData",
-						"CleansingData derive(TotalSales = QuantitySold*Price) ~> FormatDate",
-						"FormatDate filter(!isNull(SaleDate)) ~> RemoveWrongDate",
-						"RemoveWrongDate sink(allowSchemaDrift: true,",
+						"CleansingData derive(TotalSales = QuantitySold*Price,",
+						"          SaleDate = iif(\r",
+						"    isDate(SaleDate, 'MM-dd-yyyy'), toDate(SaleDate, 'MM-dd-yyyy'),\r",
+						"    iif(\r",
+						"        isDate(SaleDate, 'yyyy/MM/dd'), toDate(SaleDate, 'yyyy/MM/dd'),\r",
+						"        iif(\r",
+						"            isDate(SaleDate, 'dd/MM/yyyy'), toDate(SaleDate, 'dd/MM/yyyy'),\r",
+						"            toDate(SaleDate, 'yyyy-MM-dd') \r",
+						"        )\r",
+						"    )\r",
+						")) ~> FormatDate",
+						"FormatDate sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     input(",
 						"          SaleID as integer,",
@@ -494,44 +530,15 @@
 						"     format: 'table',",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError') ~> CentralizedSQL"
+						"     errorHandlingOption: 'allErrors',",
+						"     transactionCommit: 'single',",
+						"     reportSuccessOnError: false) ~> CentralizedSQL"
 					]
 				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SalesPOS')]",
 				"[concat(variables('factoryId'), '/datasets/SalesCentralizedDB')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DailySales')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "SalesPipeline",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2024-10-29T11:05:00",
-						"timeZone": "Romance Standard Time",
-						"schedule": {}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/SalesPipeline')]"
 			]
 		}
 	]
