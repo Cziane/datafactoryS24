@@ -1,0 +1,53 @@
+{
+	"name": "SalesCentralizedDB",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "UserDatabase",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "SaleID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ProductID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "StoreID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "SaleDate",
+				"type": "date"
+			},
+			{
+				"name": "QuantitySold",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Price",
+				"type": "decimal",
+				"precision": 10,
+				"scale": 2
+			},
+			{
+				"name": "TotalSales",
+				"type": "decimal",
+				"precision": 10,
+				"scale": 2
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "RetailSalesCleaned"
+		}
+	}
+}

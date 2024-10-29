@@ -1,0 +1,48 @@
+{
+	"name": "SalesPOS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MyAzureStorageAccount",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "retail_sales_example.csv",
+				"container": "sales-data"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "SaleID",
+				"type": "String"
+			},
+			{
+				"name": "ProductID",
+				"type": "String"
+			},
+			{
+				"name": "StoreID",
+				"type": "String"
+			},
+			{
+				"name": "SaleDate",
+				"type": "String"
+			},
+			{
+				"name": "QuantitySold",
+				"type": "String"
+			},
+			{
+				"name": "Price",
+				"type": "String"
+			}
+		]
+	}
+}
