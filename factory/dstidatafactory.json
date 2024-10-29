@@ -1,5 +1,10 @@
 {
 	"name": "dstidatafactory",
+	"properties": {
+		"globalConfigurations": {
+			"PolicyValidationEnabled": "true"
+		}
+	},
 	"location": "francecentral",
 	"identity": {
 		"type": "SystemAssigned",
