@@ -1,13 +1,72 @@
 {
-	"name": "dataflow1",
+	"name": "SalesCSV2SQL",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
-			"sources": [],
-			"sinks": [],
-			"transformations": [],
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "SalesPOS",
+						"type": "DatasetReference"
+					},
+					"name": "CsvSales"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "SalesCentralizedDB",
+						"type": "DatasetReference"
+					},
+					"name": "CentralizedSQL"
+				}
+			],
+			"transformations": [
+				{
+					"name": "CleansingData"
+				},
+				{
+					"name": "FormatDate"
+				},
+				{
+					"name": "RemoveWrongDate"
+				}
+			],
 			"scriptLines": [
-				""
+				"source(output(",
+				"          SaleID as string,",
+				"          ProductID as string,",
+				"          StoreID as string,",
+				"          SaleDate as string,",
+				"          QuantitySold as double,",
+				"          Price as double",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     limit: 100,",
+				"     ignoreNoFilesFound: false) ~> CsvSales",
+				"CsvSales filter(( !isNull(QuantitySold) && QuantitySold > 0 && !isNull(Price) && Price >0  )) ~> CleansingData",
+				"CleansingData derive(TotalSales = QuantitySold*Price) ~> FormatDate",
+				"FormatDate filter(!isNull(SaleDate)) ~> RemoveWrongDate",
+				"RemoveWrongDate sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          SaleID as integer,",
+				"          ProductID as integer,",
+				"          StoreID as integer,",
+				"          SaleDate as date,",
+				"          QuantitySold as integer,",
+				"          Price as decimal(10,2),",
+				"          TotalSales as decimal(10,2)",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> CentralizedSQL"
 			]
 		}
 	}
